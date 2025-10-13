@@ -1,0 +1,11 @@
+	
+		username ::  abinashnathpandey_db_user
+
+		password ::   oiDj2UVVy2b9PDbc
+
+
+ 		Connect to your MongoDB deployment ::    -->
+
+	mongodb+srv://abinashnathpandey_db_user:oiDj2UVVy2b9PDbc@cluster0.107xxct.mongodb.net/
+
+
