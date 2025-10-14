@@ -9,3 +9,8 @@
 	mongodb+srv://abinashnathpandey_db_user:oiDj2UVVy2b9PDbc@cluster0.107xxct.mongodb.net/
 
 
+account creation
+	name: 'AluvinaRaj Do', 
+	email: 'test@test.com', 
+	password: '1q2w3e4r5t6y7u8i9o0p', 
+	confirmPassword: '1q2w3e4r5t6y7u8i9o0p'
