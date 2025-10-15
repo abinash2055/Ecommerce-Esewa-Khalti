@@ -31,7 +31,8 @@ const fileFilter = (req, file, cb) => {
     console.log(file);
     if (
         file.mimetype === 'image/jpeg' ||
-        file.mimetype === 'image/png'
+        file.mimetype === 'image/png' || 
+        file.mimetype === 'image/jpg'
     ) {
         cb(null, true);
     } else {

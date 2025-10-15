@@ -1,75 +1,140 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from "react";
 
-export default function CartSummary({ products, onClickCheckout }) {
-    const [priceDetails, setPriceDetails] = useState({
-        price: 0,
-        discount: 0,
-    })
+const CheckoutWithSummary = ({ products, orderId }) => {
+  const [loading, setLoading] = useState(false);
+  const [priceDetails, setPriceDetails] = useState({
+    price: 0,
+    discount: 0,
+  });
 
-    useEffect(() => {
-        if (products) {
-            let total_price = 0;
-            let total_discount = 0;
-            products.forEach(cart => {
-                total_price += cart.product.price * cart.quantity
-                total_discount += (cart.product.price - cart.product.discounted_price) * cart.quantity
-            });
-            setPriceDetails({
-                price: total_price,
-                discount: total_discount
-            })
+  // Calculate total price and discount
+  useEffect(() => {
+    if (products) {
+      let total_price = 0;
+      let total_discount = 0;
+      products.forEach((cart) => {
+        total_price += cart.product.price * cart.quantity;
+        total_discount +=
+          (cart.product.price - cart.product.discounted_price) * cart.quantity;
+      });
+      setPriceDetails({
+        price: total_price,
+        discount: total_discount,
+      });
+    }
+  }, [products]);
+
+  const { price, discount } = priceDetails;
+  const orderAmount = price - discount;
+
+  // Payment handler
+  const handlePayment = async (method) => {
+    try {
+      setLoading(true);
+      let response;
+
+      if (method === "esewa") {
+        const refId = prompt("Enter eSewa Reference ID:");
+        if (!refId) {
+          alert("Payment cancelled");
+          setLoading(false);
+          return;
         }
-    }, [products])
 
-    const { price, discount } = priceDetails
+        response = await fetch(`/api/esewa/verify/${orderId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amt: orderAmount, refId, oid: orderId }),
+        });
+      } else if (method === "khalti") {
+        const token = prompt("Enter Khalti Token:");
+        if (!token) {
+          alert("Payment cancelled");
+          setLoading(false);
+          return;
+        }
 
+        response = await fetch(`/api/khalti/${orderId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            token,
+            amount: orderAmount * 100,
+            oid: orderId,
+          }),
+        });
+      }
 
-    return (
-        <section
-            aria-labelledby="summary-heading"
-            className="mt-16 rounded-md bg-white lg:col-span-4 lg:mt-0 lg:p-0"
-        >
-            <h2
-                id="summary-heading"
-                className=" border-b border-gray-200 px-4 py-3 text-lg font-medium text-gray-900 sm:p-4"
-            >
-                Price Details
-            </h2>
-            <div>
-                <dl className=" space-y-1 px-2 py-4">
-                    <div className="flex items-center justify-between">
-                        <dt className="text-sm text-gray-800">Price (3 item)</dt>
-                        <dd className="text-sm font-medium text-gray-900">Rs. {price}</dd>
-                    </div>
-                    <div className="flex items-center justify-between pt-4">
-                        <dt className="flex items-center text-sm text-gray-800">
-                            <span>Discount</span>
-                        </dt>
-                        <dd className="text-sm font-medium text-green-700">- Rs.{discount}</dd>
-                    </div>
-                    <div className="flex items-center justify-between py-4">
-                        <dt className="flex text-sm text-gray-800">
-                            <span>Delivery Charges</span>
-                        </dt>
-                        <dd className="text-sm font-medium text-green-700">Free</dd>
-                    </div>
-                    <div className="flex items-center justify-between border-y border-dashed py-4 ">
-                        <dt className="text-base font-medium text-gray-900">Total Amount</dt>
-                        <dd className="text-base font-medium text-gray-900">Rs. {price - discount}</dd>
-                    </div>
-                </dl>
-                <div className="px-2 pb-4 font-medium text-green-700">
-                    You will save Rs.{discount} on this order
-                </div>
+      const data = await response.json();
+      setLoading(false);
 
-                <button
-                    type="button"
-                    onClick={onClickCheckout}
-                    className="inline-flex w-full items-center justify-center rounded-md bg-black px-3.5 py-2.5 font-semibold leading-7 text-white hover:bg-black/80"
-                >
-                    Checkout And Pay with Esewa
-                </button>
-            </div>
-        </section>
-    )
-}
+      if (response.ok) {
+        alert(`${method.toUpperCase()} payment verified successfully!`);
+        console.log("Payment Data:", data);
+      } else {
+        alert(`Payment failed: ${data.error}`);
+      }
+    } catch (err) {
+      setLoading(false);
+      console.error(err);
+      alert("Something went wrong during payment.");
+    }
+  };
+
+  return (
+    <section className="mt-16 rounded-md bg-white lg:col-span-4 lg:mt-0 lg:p-0 shadow-lg p-6">
+      <h2 className="text-2xl font-bold text-center mb-4">
+        Price Details & Checkout
+      </h2>
+
+      <dl className="space-y-1 px-2 py-4 border-b border-gray-200">
+        <div className="flex justify-between">
+          <dt>Price ({products?.length} item)</dt>
+          <dd>Rs. {price}</dd>
+        </div>
+        <div className="flex justify-between">
+          <dt>Discount</dt>
+          <dd className="text-green-700">- Rs.{discount}</dd>
+        </div>
+        <div className="flex justify-between">
+          <dt>Delivery Charges</dt>
+          <dd className="text-green-700">Free</dd>
+        </div>
+        <div className="flex justify-between border-t border-dashed pt-2">
+          <dt className="font-medium">Total Amount</dt>
+          <dd className="font-medium">Rs. {orderAmount}</dd>
+        </div>
+      </dl>
+
+      <div className="my-4 text-green-700 font-medium">
+        You will save Rs.{discount} on this order
+      </div>
+
+      <button
+        onClick={() => handlePayment("esewa")}
+        disabled={loading}
+        className={`w-full mb-2 px-4 py-2 rounded text-white font-semibold transition ${
+          loading
+            ? "bg-green-300 cursor-not-allowed"
+            : "bg-green-500 hover:bg-green-600"
+        }`}
+      >
+        {loading ? "Processing..." : "Pay with eSewa"}
+      </button>
+
+      <button
+        onClick={() => handlePayment("khalti")}
+        disabled={loading}
+        className={`w-full px-4 py-2 rounded text-white font-semibold transition ${
+          loading
+            ? "bg-blue-300 cursor-not-allowed"
+            : "bg-blue-500 hover:bg-blue-600"
+        }`}
+      >
+        {loading ? "Processing..." : "Pay with Khalti"}
+      </button>
+    </section>
+  );
+};
+
+export default CheckoutWithSummary;

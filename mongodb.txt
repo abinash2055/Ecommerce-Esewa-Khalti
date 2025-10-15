@@ -10,7 +10,16 @@
 
 
 account creation
+	role: 1 (Admin)
 	name: 'AluvinaRaj Do', 
 	email: 'test@test.com', 
-	password: '1q2w3e4r5t6y7u8i9o0p', 
-	confirmPassword: '1q2w3e4r5t6y7u8i9o0p'
+	password: '1q2w3e4r5t', 
+	confirmPassword: '1q2w3e4r5t'
+
+`````````````````````````````````````````````````````
+
+	role: 0 (User)
+	name: 'Ram Kumar Shah', 
+	email: 'ram@ram.com', 
+	password: '5t4r3e2w1q', 
+	confirmPassword: '5t4r3e2w1q'

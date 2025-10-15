@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
+// Routes
 const authRoute = require('./routes/auth');
 const userRoute = require('./routes/users');
 const brandRoute = require('./routes/brand');
@@ -31,6 +32,7 @@ mongoose.connect('mongodb+srv://abinashnathpandey_db_user:oiDj2UVVy2b9PDbc@clust
         console.log(err);
     })
 
+    // Routes
 app.use('/api/users', authRoute);
 app.use('/api/users', userRoute);
 app.use('/api/brands', brandRoute);
@@ -40,8 +42,11 @@ app.use('/api/carts', cartRoute);
 app.use('/api/orders', orderRoute);
 app.use('/api/esewa', esewaRoute);
 
+// Serve uploaded files statically
 app.use(`/api/uploads`, express.static('uploads'));
 
+
+// Start server
 app.listen(port, () => {
     console.log(`Server running at http://${hostname}:${port}/`);
 });
